@@ -110,6 +110,12 @@ if ($slug) {
           $indieweb_html_header
           <!-- Stylesheet -->
           <link rel="stylesheet" href="style.css">
+          <!-- Favicons -->
+          <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
+          <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
+          <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
+          <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192.png">
+          <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512.png">
         </head>
         <body>
         HTML;
@@ -144,6 +150,12 @@ echo <<<HTML
   $indieweb_html_header
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
+  <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
+  <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
+  <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512.png">
 </head>
 <body>
   <h1>My Blog</h1>
