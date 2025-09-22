@@ -76,7 +76,7 @@ function render_post($post, $slug) {
 
     // Author (h-card / u-author)
     if (!empty($post['author'])) {
-        $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' /><br><a class='u-url' href='{$post['author']}'>{$post['author']}</a></div>";
+        $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='Avatar'/><br><a class='u-url' href='{$post['author']}'>{$post['author']}</a></div>";
     }
   
     // Syndicated copies (u-syndication)
@@ -161,7 +161,7 @@ echo <<<HTML
   <h1>My Blog</h1>
   <div class='h-card'>
     <a class='u-url u-uid' href='$site_url/'>$site_url/</a><br>
-    <img class="u-photo" src="$avatar_url&size=80" />
+    <img class="u-photo" src="$avatar_url&size=80" alt="Avatar"/>
     <p class="p-note">$bio</p>
   </div>
   <p>Subscribe: 
