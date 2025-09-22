@@ -6,7 +6,7 @@ require_once __DIR__ . '/config.php';
 
 // --- CONFIG ---
 $BASE_URL = $site_url;
-$INDIEAUTH_TOKEN_URL = '$token_endpoint'; // IndieAuth token verification
+$INDIEAUTH_TOKEN_URL = $token_endpoint; // IndieAuth token verification
 $POSTS_DIR = __DIR__ . '/posts'; // folder to store posts
 if (!is_dir($POSTS_DIR)) mkdir($POSTS_DIR, 0755, true);
 

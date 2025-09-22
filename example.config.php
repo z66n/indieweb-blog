@@ -3,6 +3,7 @@
 
 // Site info
 $site_name = "My Blog";
+$site_desc = "A simple Micropub-powered blog";
 $site_domain = "example.com";
 $site_url = "https://$site_domain";
 $admin_email = "admin@$site_domain";

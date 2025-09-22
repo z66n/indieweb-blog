@@ -18,6 +18,23 @@ $indieweb_html_header = <<<HTML
     <link rel="micropub" href="$site_url/micropub.php">
 HTML;
 
+$shared_html_header = <<<HTML
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
+    <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
+    <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
+    <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192">
+    <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512">
+    <!-- Open Graph -->
+    <meta property="og:title" content="$site_name">
+    <meta property="og:description" content="$site_desc">
+    <meta property="og:image" content="$avatar_url&size=192.png">
+    <meta property="og:url" content="$site_url">
+    <meta property="og:type" content="website">
+HTML;
+
 function render_post($post, $slug) {
     global $avatar_url;
 
@@ -106,16 +123,9 @@ if ($slug) {
           <meta charset="UTF-8">
           <title>Post</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta name="description" content="A simple Micropub-powered blog">
+          <meta name="description" content="$site_desc">
           $indieweb_html_header
-          <!-- Stylesheet -->
-          <link rel="stylesheet" href="style.css">
-          <!-- Favicons -->
-          <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
-          <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
-          <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
-          <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192.png">
-          <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512.png">
+          $shared_html_header
         </head>
         <body>
         HTML;
@@ -143,19 +153,12 @@ echo <<<HTML
   <meta charset="UTF-8">
   <title>$site_name</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A simple Micropub-powered blog">
+  <meta name="description" content=$site_desc>
   <!-- Feed -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.php">
   <link rel="alternate" type="application/json" title="JSON Feed" href="/feed.php?format=json">
   $indieweb_html_header
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css">
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
-  <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
-  <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
-  <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512.png">
+  $shared_html_header
 </head>
 <body>
   <h1>My Blog</h1>
