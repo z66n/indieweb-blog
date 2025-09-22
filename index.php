@@ -30,7 +30,7 @@ $shared_html_header = <<<HTML
     <!-- Open Graph -->
     <meta property="og:title" content="$site_name">
     <meta property="og:description" content="$site_desc">
-    <meta property="og:image" content="$avatar_url&size=192.png">
+    <meta property="og:image" content="$avatar_url&size=216">
     <meta property="og:url" content="$site_url">
     <meta property="og:type" content="website">
 HTML;
