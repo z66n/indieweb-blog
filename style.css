@@ -40,6 +40,12 @@ h1 {
     border-radius: 50%;
 }
 
+.h-card .h-card-text {
+    display: flex;
+    flex-direction: column; /* stack URL and note vertically */
+    gap: 0.25rem; /* spacing between URL and note */
+}
+
 .h-card .p-note {
     margin: 0;
     font-style: italic;

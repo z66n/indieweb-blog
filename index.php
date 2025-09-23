@@ -35,6 +35,26 @@ $shared_html_header = <<<HTML
     <meta property="og:type" content="website">
 HTML;
 
+$script .= <<<HTML
+<script>
+document.querySelectorAll('time.dt-published').forEach(el => {
+    const utcTime = el.getAttribute('datetime');
+    if (!utcTime) return;
+    
+    const dt = new Date(utcTime); // JS parses ISO 8601 UTC
+    const formatted = dt.toLocaleString([], {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    el.textContent = formatted;
+});
+</script>
+HTML;
+
+
 function get_content_html($content) {
     if (is_array($content)) {
         if (!empty($content['html'])) return $content['html'];
@@ -47,40 +67,52 @@ function render_post($post, $slug) {
     global $avatar_url;
 
     $html = "<article class='h-entry'>";
-    $published = isset($post['published']) ? date("Y-m-d H:i", strtotime($post['published'])) : "";
+
+    // Unwrap helper for single value arrays
+    $get = fn($k) => isset($post['properties'][$k]) ? $post['properties'][$k][0] ?? '' : '';
+
+    // Published date
+    $published_raw = $get('published');
+    if ($published_raw) {
+        $dt = new DateTime($published_raw);
+        $published = $dt->format("Y-m-d H:i");
+    } else {
+        $published = '';
+    }
 
     // Post title (p-name)
-    if (!empty($post['name'])) {
-        $html .= "<h2 class='p-name'><a class='u-url' href='?p=$slug'>{$post['name']}</a></h2>";
+    $name = $get('name');
+    if (!empty($name)) {
+        $html .= "<h2 class='p-name'><a class='u-url' href='?p=$slug'>{$name}</a></h2>";
     } else {
         $html .= "<h2><a class='u-url' href='?p=$slug'>$slug</a></h2>";
     }
 
     if ($published) {
-        $html .= "<time class='dt-published' datetime='{$post['published']}'>$published</time>";
+        $html .= "<time class='dt-published' datetime='{$published_raw}'>$published</time>";
     }
 
     // Replies
-    if (!empty($post['in-reply-to'])) {
-        $html .= "<p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$post['in-reply-to']}'>{$post['in-reply-to']}</a></p>";
+    if (!empty($get('in-reply-to'))) {
+        $html .= "<p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$get('in-reply-to')}'>{$get('in-reply-to')}</a></p>";
     }
     // Bookmarks
-    if (!empty($post['bookmark-of'])) {
-        $html .= "<p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$post['bookmark-of']}'>{$post['bookmark-of']}</a></p>";
+    if (!empty($get('bookmark-of'))) {
+        $html .= "<p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$get('bookmark-of')}'>{$get('bookmark-of')}</a></p>";
     }
     // Favorites
-    if (!empty($post['like-of'])) {
-        $html .= "<p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$post['like-of']}'>{$post['like-of']}</a></p>";
+    if (!empty($get('like-of'))) {
+        $html .= "<p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$get('like-of')}'>{$get('like-of')}</a></p>";
     }
 
     // Content (always)
-    if (!empty($post['content'])) {
-        $content = get_content_html($post['content']);
+    if (!empty($get('content'))) {
+        $content = get_content_html($get('content'));
         $html .= "<div class='e-content'>$content</div>";
     }
 
     // Categories (p-category)
-    $categories = (array)($post['category'] ?? []);
+    $categories = $post['properties']['category'] ?? [];
     if (!empty($categories)) {
         $tags = array_map(function($cat) {
             return "<span class='p-category'>$cat</span>";
@@ -89,16 +121,16 @@ function render_post($post, $slug) {
     }
 
     // Author (h-card / u-author)
-    if (!empty($post['author'])) {
-        $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='Avatar'/><br><a class='u-url' href='{$post['author']}'>{$post['author']}</a></div>";
+    if (!empty($get('author'))) {
+        $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='Avatar'/><br><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>";
     }
 
     // Syndicated copies (u-syndication)
-    if (!empty($post['syndication'])) {
+    if (!empty($get('syndication'))) {
         $html .= "<div class='syndication'>Syndicated copies: ";
         $links = array_map(function($url) {
             return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
-        }, (array)$post['syndication']);
+        }, (array)$get('syndication'));
         $html .= implode(" ", $links);
         $html .= "</div>";
     }
@@ -127,7 +159,7 @@ if ($slug) {
         <body>
         HTML;
         echo render_post($post, $slug);
-        echo "</body></html>";
+        echo "</body>$script</html>";
         exit;
     } else {
         http_response_code(404);
@@ -160,9 +192,11 @@ echo <<<HTML
 <body>
   <h1>My Blog</h1>
   <div class='h-card'>
-    <a class='u-url u-uid' href='$site_url/'>$site_url/</a><br>
     <img class="u-photo" src="$avatar_url&size=80" alt="Avatar"/>
-    <p class="p-note">$bio</p>
+    <div class="h-card-text">
+        <a class="u-url u-uid" href="$site_url/">$site_url/</a>
+        <p class="p-note">$bio</p>
+    </div>
   </div>
   <p>Subscribe: 
     <a href="/feed.php">RSS</a>|
@@ -174,4 +208,4 @@ foreach ($files as $file) {
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
 }
-echo "</body></html>";
+echo "</body>$script</html>";

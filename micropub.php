@@ -44,12 +44,13 @@ if ($method === 'POST') {
         $input = file_get_contents('php://input');
         $json  = json_decode($input, true);
 
-        $type  = $json['type'][0] ?? 'entry';
+        $type  = $json['type'][0] ?? 'h-entry';
         $props = $json['properties'] ?? [];
 
     } else {
         // Form-encoded body
-        $type  = $_POST['h'] ?? 'entry';
+        $h = $_POST['h'] ?? 'entry';
+        $type = ($h === 'entry') ? 'h-entry' : $h;
         $props = [
             'name'        => $_POST['name'] ?? null,
             'content'     => $_POST['content'] ?? null,
