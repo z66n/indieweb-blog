@@ -102,7 +102,8 @@ if ($method === 'POST') {
             $known_token = $syndication_tokens[$endpoint] ?? "";
             $ch = curl_init($endpoint);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST)); // Form-encoded - Quill only support note and bookmark for now
+            // Form-encoded POST: Quill only supports syndication for note and bookmark
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Authorization: Bearer ' . $known_token, 
                 'Content-Type: application/x-www-form-urlencoded'
