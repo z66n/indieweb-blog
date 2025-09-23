@@ -54,7 +54,6 @@ document.querySelectorAll('time.dt-published').forEach(el => {
 </script>
 HTML;
 
-
 function get_content_html($content) {
     if (is_array($content)) {
         if (!empty($content['html'])) return $content['html'];
@@ -126,12 +125,13 @@ function render_post($post, $slug) {
     }
 
     // Syndicated copies (u-syndication)
-    if (!empty($get('syndication'))) {
-        $html .= "<div class='syndication'>Syndicated copies: ";
+    $syndicated_urls = $post['properties']['u-syndication'] ?? [];
+    if (!empty($syndicated_urls)) {
+        $html .= "<div class='u-syndication'>Syndicated copies: ";
         $links = array_map(function($url) {
             return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
-        }, (array)$get('syndication'));
-        $html .= implode(" ", $links);
+        }, $syndicated_urls);
+        $html .= implode(", ", $links);
         $html .= "</div>";
     }
 

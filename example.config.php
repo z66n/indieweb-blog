@@ -15,3 +15,14 @@ $authorization_endpoint = "https://indieauth.com/auth";
 $token_endpoint = "https://tokens.indieauth.com/token";
 $microsub_endpoint = "https://aperture.p3k.io/microsub/9999"; // sign up at https://aperture.p3k.io
 $webmention_endpoint = "https://webmention.io/$site_domain/webmention"; // sign up at https://webmention.io
+
+// Syndication
+$syndication_targets = [
+    [
+        'uid' => 'https://news.indieweb.org',
+        'name' => 'IndieNews'
+    ]
+];
+$syndication_tokens = [
+    'https://news.indieweb.org' => '123456789' // token for syndication micropub endpoint
+];

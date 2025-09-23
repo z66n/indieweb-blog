@@ -6,6 +6,7 @@ A minimal PHP-based IndieWeb blog supporting [Micropub](https://indieweb.org/Mic
 
 - IndieAuth authentication
 - Micropub endpoint for publishing posts
+- Syndication to other Micropub endpoints
 - JSON Feed and RSS Feed
 - Webmention, Microsub, and IndieAuth endpoint discovery
 - Minimal, file-based storage (no database required)

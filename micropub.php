@@ -52,16 +52,17 @@ if ($method === 'POST') {
         $h = $_POST['h'] ?? 'entry';
         $type = ($h === 'entry') ? 'h-entry' : $h;
         $props = [
-            'name'        => $_POST['name'] ?? null,
-            'content'     => $_POST['content'] ?? null,
-            'category'    => (array)($_POST['category'] ?? []),
-            'mp-slug'     => $_POST['mp-slug'] ?? null,
-            'status'      => $_POST['status'] ?? 'published',
-            'published'   => $_POST['published'] ?? date(DATE_ATOM),
-            'bookmark-of' => $_POST['bookmark-of'] ?? null,
-            'like-of'     => $_POST['like-of'] ?? null,
-            'in-reply-to' => $_POST['in-reply-to'] ?? null,
-            'location'    => $_POST['location'] ?? null,
+            'name'            => $_POST['name'] ?? null,
+            'content'         => $_POST['content'] ?? null,
+            'category'        => (array)($_POST['category'] ?? []),
+            'mp-slug'         => $_POST['mp-slug'] ?? null,
+            'status'          => $_POST['status'] ?? 'published',
+            'published'       => $_POST['published'] ?? date(DATE_ATOM),
+            'bookmark-of'     => $_POST['bookmark-of'] ?? null,
+            'like-of'         => $_POST['like-of'] ?? null,
+            'in-reply-to'     => $_POST['in-reply-to'] ?? null,
+            'location'        => $_POST['location'] ?? null,
+            'mp-syndicate-to' => (array)($_POST['mp-syndicate-to'] ?? []),
         ];
     }
 
@@ -78,19 +79,56 @@ if ($method === 'POST') {
     $post = [
         'type' => [$type],
         'properties' => [
-            'name'        => (array)($props['name'] ?? []),
-            'content'     => (array)($props['content'] ?? []),
-            'category'    => (array)($props['category'] ?? []),
-            'mp-slug'     => (array)($props['mp-slug'] ?? [$slug]),
-            'status'      => (array)($props['status'] ?? ['published']),
-            'published'   => (array)($props['published'] ?? [date(DATE_ATOM)]),
-            'bookmark-of' => (array)($props['bookmark-of'] ?? []),
-            'like-of'     => (array)($props['like-of'] ?? []),
-            'in-reply-to' => (array)($props['in-reply-to'] ?? []),
-            'location'    => (array)($props['location'] ?? []),
-            'author'      => [$user],
+            'name'            => (array)($props['name'] ?? []),
+            'content'         => (array)($props['content'] ?? []),
+            'category'        => (array)($props['category'] ?? []),
+            'mp-slug'         => (array)($props['mp-slug'] ?? [$slug]),
+            'status'          => (array)($props['status'] ?? ['published']),
+            'published'       => (array)($props['published'] ?? [date(DATE_ATOM)]),
+            'bookmark-of'     => (array)($props['bookmark-of'] ?? []),
+            'like-of'         => (array)($props['like-of'] ?? []),
+            'in-reply-to'     => (array)($props['in-reply-to'] ?? []),
+            'location'        => (array)($props['location'] ?? []),
+            'mp-syndicate-to' => (array)($props['mp-syndicate-to'] ?? []),
+            'author'          => [$user],
         ]
     ];
+
+    // Syndication to another micropub endpoint
+    if (!empty($post['properties']['mp-syndicate-to'])) {
+        $targets = $post['properties']['mp-syndicate-to'];
+        $syndicated_urls = []; // initialize array
+        foreach ($targets as $endpoint) {
+            $known_token = $syndication_tokens[$endpoint] ?? "";
+            $ch = curl_init($endpoint);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST)); // Form-encoded - Quill only support note and bookmark for now
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $known_token, 
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HEADER, true); // capture headers
+            $resp = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $location = null;
+            if (preg_match('/Location:\s*(.+)/i', $resp, $matches)) {
+                $location = trim($matches[1]);
+                $syndicated_urls[] = $location; // add to array
+            }
+
+            echo "Forwarded to $endpoint → HTTP $code\n";
+            echo "Syndicated URL: $location\n";
+            // echo $resp;
+        }
+    }
+
+    // Add u-syndication property if we have any syndicated URLs
+    if (!empty($syndicated_urls)) {
+        $post['properties']['u-syndication'] = $syndicated_urls;
+    }
 
     // Save post
     file_put_contents($filename, json_encode($post, JSON_PRETTY_PRINT));
@@ -102,16 +140,26 @@ if ($method === 'POST') {
     exit;
 }
 
-// Optional: GET returns list of posts
 if ($method === 'GET') {
-    $posts = [];
-    foreach (glob("$POSTS_DIR/*.json") as $file) {
-        $data = json_decode(file_get_contents($file), true);
-        $posts[] = $data;
+    // Config or syndicate-to query for syndication targets
+    if (isset($_GET['q']) && in_array($_GET['q'], ['config', 'syndicate-to'], true)) {
+        http_response_code(200);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'syndicate-to' => $syndication_targets
+        ]);
+        exit;
+    } else {
+        // Optional: GET returns list of posts
+        $posts = [];
+        foreach (glob("$POSTS_DIR/*.json") as $file) {
+            $data = json_decode(file_get_contents($file), true);
+            $posts[] = $data;
+        }
+        header('Content-Type: application/json');
+        echo json_encode($posts);
+        exit;
     }
-    header('Content-Type: application/json');
-    echo json_encode($posts);
-    exit;
 }
 
 // fallback
