@@ -19,10 +19,10 @@ $webmention_endpoint = "https://webmention.io/$site_domain/webmention"; // sign 
 // Syndication
 $syndication_targets = [
     [
-        'uid' => 'https://news.indieweb.org',
-        'name' => 'IndieNews'
+        'uid' => 'https://your-syndication-site.com/micropub', // micropub endpoint URL
+        'name' => 'Your Syndication Site' // human-readable name
     ]
 ];
 $syndication_tokens = [
-    'https://news.indieweb.org' => '123456789' // token for syndication micropub endpoint
+    'https://your-syndication-site.com/micropub' => '123456789' // Bearer token for syndication endpoint
 ];
