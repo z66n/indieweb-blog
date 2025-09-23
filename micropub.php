@@ -37,39 +37,65 @@ if (!$user) {
 }
 
 if ($method === 'POST') {
-    $type = $_POST['h'] ?? 'entry';
-    $content = $_POST['content'] ?? '';
-    $date = date('Y-m-d-H-i-s');
-  $slug = preg_replace('/[^a-z0-9_-]/', '', strtolower($_POST['mp-slug'] ?? $date));
-  $filename = "$POSTS_DIR/$slug.json";
+    $is_json = (stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false);
 
-  $post = [
-    'type' => $type,
-    'name' => $_POST['name'] ?? null,
-    'content' => $_POST['content'] ?? null,
-    // 'content.html' => $_POST['content'] ?? null,
-    'category' => $_POST['category'] ?? [],
-    'slug' => $_POST['mp-slug'] ?? $slug,
-    'status' => $_POST['status'] ?? 'published',
-    'published' => $_POST['published'] ?? date(DATE_ATOM),
-    'bookmark-of' => $_POST['bookmark-of'] ?? null,
-    'like-of' => $_POST['like-of'] ?? null,
-    // 'post-status' => $_POST['post-status'] ?? null,
-    'in-reply-to' => $_POST['in-reply-to'] ?? null,
-    'location' => $_POST['location'] ?? null,
-    'author' => $user
-  ];
+    if ($is_json) {
+        // JSON body
+        $input = file_get_contents('php://input');
+        $json  = json_decode($input, true);
+
+        $type  = $json['type'][0] ?? 'entry';
+        $props = $json['properties'] ?? [];
+
+    } else {
+        // Form-encoded body
+        $type  = $_POST['h'] ?? 'entry';
+        $props = [
+            'name'        => $_POST['name'] ?? null,
+            'content'     => $_POST['content'] ?? null,
+            'category'    => (array)($_POST['category'] ?? []),
+            'mp-slug'     => $_POST['mp-slug'] ?? null,
+            'status'      => $_POST['status'] ?? 'published',
+            'published'   => $_POST['published'] ?? date(DATE_ATOM),
+            'bookmark-of' => $_POST['bookmark-of'] ?? null,
+            'like-of'     => $_POST['like-of'] ?? null,
+            'in-reply-to' => $_POST['in-reply-to'] ?? null,
+            'location'    => $_POST['location'] ?? null,
+        ];
+    }
+
+    // Common helper
+    $get = fn($k) => isset($props[$k]) ? (is_array($props[$k]) ? $props[$k][0] : $props[$k]) : null;
+
+    // Slug/filename
+    $date         = date('Y-m-d-H-i-s');
+    $slug         = preg_replace('/[^a-z0-9_-]/', '', strtolower($get('mp-slug') ?? $date));
+    $filename     = "$POSTS_DIR/$slug.json";
+    $location_url = "$BASE_URL/?p=$slug";
+
+    // Build final post object (shared)
+    $post = [
+        'type'        => $type,
+        'name'        => $get('name'),
+        'content'     => $get('content'),
+        'category'    => $get('category') ?? [],
+        'slug'        => $get('mp-slug') ?? $slug,
+        'status'      => $get('status') ?? 'published',
+        'published'   => $get('published') ?? date(DATE_ATOM),
+        'bookmark-of' => $get('bookmark-of'),
+        'like-of'     => $get('like-of'),
+        'in-reply-to' => $get('in-reply-to'),
+        'location'    => $get('location'),
+        'author'      => $user,
+    ];
+
+    // Save post
     file_put_contents($filename, json_encode($post, JSON_PRETTY_PRINT));
-  
-    // Optionally save HTML
-    // $htmlFile = "$POSTS_DIR/$slug.html";
-    // file_put_contents($htmlFile, $_POST['content.html'] ?? '');
 
-    // Respond with location that exists
     http_response_code(201);
-    header('Content-Type: application/json'); // JSON content
-    header('Location: ' . "$BASE_URL/posts/$slug.json"); // MUST be set
-    echo json_encode(['location' => "$BASE_URL/posts/$slug.json"]);
+    header('Content-Type: application/json');
+    header('Location: ' . $location_url);
+    echo json_encode(['location' => $location_url]);
     exit;
 }
 

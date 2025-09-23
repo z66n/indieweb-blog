@@ -35,6 +35,14 @@ $shared_html_header = <<<HTML
     <meta property="og:type" content="website">
 HTML;
 
+function get_content_html($content) {
+    if (is_array($content)) {
+        if (!empty($content['html'])) return $content['html'];
+        return '';
+    }
+    return nl2br(htmlspecialchars($content));
+}
+
 function render_post($post, $slug) {
     global $avatar_url;
 
@@ -52,42 +60,31 @@ function render_post($post, $slug) {
         $html .= "<time class='dt-published' datetime='{$post['published']}'>$published</time>";
     }
 
-    // Handle favorites / likes
+    // Replies
+    if (!empty($post['in-reply-to'])) {
+        $html .= "<p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$post['in-reply-to']}'>{$post['in-reply-to']}</a></p>";
+    }
+    // Bookmarks
+    if (!empty($post['bookmark-of'])) {
+        $html .= "<p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$post['bookmark-of']}'>{$post['bookmark-of']}</a></p>";
+    }
+    // Favorites
     if (!empty($post['like-of'])) {
         $html .= "<p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$post['like-of']}'>{$post['like-of']}</a></p>";
     }
 
-    // Handle bookmarks
-    elseif (!empty($post['bookmark-of'])) {
-        $html .= "<p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$post['bookmark-of']}'>{$post['bookmark-of']}</a></p>";
-        if (!empty($post['content'])) {
-            $content = is_array($post['content']) ? $post['content']['text'] : $post['content'];
-            $html .= "<div class='e-content'><p>$content</p></div>";
-        }
-    }
-
-    // Handle replies
-    elseif (!empty($post['in-reply-to'])) {
-        $html .= "<p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$post['in-reply-to']}'>{$post['in-reply-to']}</a></p>";
-        if (!empty($post['content'])) {
-            $content = is_array($post['content']) ? $post['content']['text'] : $post['content'];
-            $html .= "<div class='e-content'><p>$content</p></div>";
-        }
-    }
-
-    // Handle notes (default)
-    else {
-        if (!empty($post['content'])) {
-            $content = is_array($post['content']) ? $post['content']['text'] : $post['content'];
-            $html .= "<div class='e-content'><p>$content</p></div>";
-        }
+    // Content (always)
+    if (!empty($post['content'])) {
+        $content = get_content_html($post['content']);
+        $html .= "<div class='e-content'>$content</div>";
     }
 
     // Categories (p-category)
-    if (!empty($post['category'])) {
+    $categories = (array)($post['category'] ?? []);
+    if (!empty($categories)) {
         $tags = array_map(function($cat) {
             return "<span class='p-category'>$cat</span>";
-        }, $post['category']);
+        }, $categories);
         $html .= "<div class='tags'>Tags: " . implode(", ", $tags) . "</div>";
     }
 
@@ -95,15 +92,15 @@ function render_post($post, $slug) {
     if (!empty($post['author'])) {
         $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='Avatar'/><br><a class='u-url' href='{$post['author']}'>{$post['author']}</a></div>";
     }
-  
+
     // Syndicated copies (u-syndication)
     if (!empty($post['syndication'])) {
-      $html .= "<div class='syndication'>Syndicated copies: ";
-      $links = array_map(function($url) {
-        return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
-      }, (array)$post['syndication']);
-      $html .= implode(" ", $links);
-      $html .= "</div>";
+        $html .= "<div class='syndication'>Syndicated copies: ";
+        $links = array_map(function($url) {
+            return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
+        }, (array)$post['syndication']);
+        $html .= implode(" ", $links);
+        $html .= "</div>";
     }
 
     $html .= "</article>";
