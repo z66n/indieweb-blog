@@ -94,7 +94,7 @@ if ($method === 'POST') {
         ]
     ];
 
-    // Syndication to another micropub endpoint
+    // Syndication to other micropub endpoints
     if (!empty($post['properties']['mp-syndicate-to'])) {
         $targets = $post['properties']['mp-syndicate-to'];
         $syndicated_urls = []; // initialize array
