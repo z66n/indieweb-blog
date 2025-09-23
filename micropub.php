@@ -75,18 +75,20 @@ if ($method === 'POST') {
 
     // Build final post object (shared)
     $post = [
-        'type'        => $type,
-        'name'        => $get('name'),
-        'content'     => $get('content'),
-        'category'    => $get('category') ?? [],
-        'slug'        => $get('mp-slug') ?? $slug,
-        'status'      => $get('status') ?? 'published',
-        'published'   => $get('published') ?? date(DATE_ATOM),
-        'bookmark-of' => $get('bookmark-of'),
-        'like-of'     => $get('like-of'),
-        'in-reply-to' => $get('in-reply-to'),
-        'location'    => $get('location'),
-        'author'      => $user,
+        'type' => [$type],
+        'properties' => [
+            'name'        => (array)($props['name'] ?? []),
+            'content'     => (array)($props['content'] ?? []),
+            'category'    => (array)($props['category'] ?? []),
+            'mp-slug'     => (array)($props['mp-slug'] ?? [$slug]),
+            'status'      => (array)($props['status'] ?? ['published']),
+            'published'   => (array)($props['published'] ?? [date(DATE_ATOM)]),
+            'bookmark-of' => (array)($props['bookmark-of'] ?? []),
+            'like-of'     => (array)($props['like-of'] ?? []),
+            'in-reply-to' => (array)($props['in-reply-to'] ?? []),
+            'location'    => (array)($props['location'] ?? []),
+            'author'      => [$user],
+        ]
     ];
 
     // Save post
