@@ -5,52 +5,52 @@
 require_once __DIR__ . '/config.php';
 
 $indieweb_html_header = <<<HTML
-    <!-- IndieAuth discovery -->
-    <link rel="authorization_endpoint" href="$authorization_endpoint">
-    <link rel="token_endpoint" href="$token_endpoint">
-    <!-- rel=me proofs -->
-    <link rel="me" href="mailto:$admin_email">
-    <!-- Microsub endpoint -->
-    <link rel="microsub" href="$microsub_endpoint">
-    <!-- Webmention -->
-    <link rel="webmention" href="$webmention_endpoint" />
-    <!-- Micropub endpoint -->
-    <link rel="micropub" href="$site_url/micropub.php">
+  <!-- IndieAuth discovery -->
+  <link rel="authorization_endpoint" href="$authorization_endpoint">
+  <link rel="token_endpoint" href="$token_endpoint">
+  <!-- rel=me proofs -->
+  <link rel="me" href="mailto:$admin_email">
+  <!-- Microsub endpoint -->
+  <link rel="microsub" href="$microsub_endpoint">
+  <!-- Webmention -->
+  <link rel="webmention" href="$webmention_endpoint" />
+  <!-- Micropub endpoint -->
+  <link rel="micropub" href="$site_url/micropub.php">
 HTML;
 
 $shared_html_header = <<<HTML
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
-    <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
-    <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
-    <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192">
-    <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512">
-    <!-- Open Graph -->
-    <meta property="og:title" content="$site_name">
-    <meta property="og:description" content="$site_desc">
-    <meta property="og:image" content="$avatar_url&size=216">
-    <meta property="og:url" content="$site_url">
-    <meta property="og:type" content="website">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="$avatar_url&size=32">
+  <link rel="icon" type="image/png" sizes="16x16" href="$avatar_url&size=16">
+  <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
+  <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192">
+  <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512">
+  <!-- Open Graph -->
+  <meta property="og:title" content="$site_name">
+  <meta property="og:description" content="$site_desc">
+  <meta property="og:image" content="$avatar_url&size=216">
+  <meta property="og:url" content="$site_url">
+  <meta property="og:type" content="website">
 HTML;
 
 $script .= <<<HTML
 <script>
-document.querySelectorAll('time.dt-published').forEach(el => {
-    const utcTime = el.getAttribute('datetime');
-    if (!utcTime) return;
-    
-    const dt = new Date(utcTime); // JS parses ISO 8601 UTC
-    const formatted = dt.toLocaleString([], {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
+    document.querySelectorAll('time.dt-published').forEach(el => {
+        const utcTime = el.getAttribute('datetime');
+        if (!utcTime) return;
+        
+        const dt = new Date(utcTime); // JS parses ISO 8601 UTC
+        const formatted = dt.toLocaleString([], {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        el.textContent = formatted;
     });
-    el.textContent = formatted;
-});
 </script>
 HTML;
 
@@ -65,7 +65,7 @@ function get_content_html($content) {
 function render_post($post, $slug) {
     global $avatar_url;
 
-    $html = "<article class='h-entry'>";
+    $html = "  <article class='h-entry'>\n";
 
     // Unwrap helper for single value arrays
     $get = fn($k) => isset($post['properties'][$k]) ? $post['properties'][$k][0] ?? '' : '';
@@ -82,32 +82,32 @@ function render_post($post, $slug) {
     // Post title (p-name)
     $name = $get('name');
     if (!empty($name)) {
-        $html .= "<h2 class='p-name'><a class='u-url' href='?p=$slug'>{$name}</a></h2>";
+        $html .= "    <h2 class='p-name'><a class='u-url' href='?p=$slug'>{$name}</a></h2>\n";
     } else {
-        $html .= "<h2><a class='u-url' href='?p=$slug'>$slug</a></h2>";
+        $html .= "    <h2><a class='u-url' href='?p=$slug'>$slug</a></h2>\n";
     }
 
     if ($published) {
-        $html .= "<time class='dt-published' datetime='{$published_raw}'>$published</time>";
+        $html .= "    <time class='dt-published' datetime='{$published_raw}'>$published</time>\n";
     }
 
     // Replies
     if (!empty($get('in-reply-to'))) {
-        $html .= "<p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$get('in-reply-to')}'>{$get('in-reply-to')}</a></p>";
+        $html .= "    <p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$get('in-reply-to')}'>{$get('in-reply-to')}</a></p>\n";
     }
     // Bookmarks
     if (!empty($get('bookmark-of'))) {
-        $html .= "<p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$get('bookmark-of')}'>{$get('bookmark-of')}</a></p>";
+        $html .= "    <p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$get('bookmark-of')}'>{$get('bookmark-of')}</a></p>\n";
     }
     // Favorites
     if (!empty($get('like-of'))) {
-        $html .= "<p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$get('like-of')}'>{$get('like-of')}</a></p>";
+        $html .= "    <p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$get('like-of')}'>{$get('like-of')}</a></p>\n";
     }
 
     // Content (always)
     if (!empty($get('content'))) {
         $content = get_content_html($get('content'));
-        $html .= "<div class='e-content'>$content</div>";
+        $html .= "    <div class='e-content'>$content</div>\n";
     }
 
     // Categories (p-category)
@@ -116,26 +116,27 @@ function render_post($post, $slug) {
         $tags = array_map(function($cat) {
             return "<span class='p-category'>$cat</span>";
         }, $categories);
-        $html .= "<div class='tags'>Tags: " . implode(", ", $tags) . "</div>";
+        $html .= "    <div class='tags'>Tags: " . implode(", ", $tags) . "</div>\n";
     }
 
     // Author (h-card / u-author)
     if (!empty($get('author'))) {
-        $html .= "<div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='Avatar'/><br><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>";
+        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='author avatar'/><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
     $syndicated_urls = $post['properties']['u-syndication'] ?? [];
     if (!empty($syndicated_urls)) {
-        $html .= "<div class='u-syndication'>Syndicated copies: ";
+        $html .= "    <div class='u-syndication'>Syndicated copies: ";
         $links = array_map(function($url) {
             return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
         }, $syndicated_urls);
         $html .= implode(", ", $links);
-        $html .= "</div>";
+        $html .= "</div>\n";
     }
 
-    $html .= "</article>";
+    $html .= "  </article>\n";
+    
     return $html;
 }
 
@@ -156,10 +157,10 @@ if ($slug) {
           $indieweb_html_header
           $shared_html_header
         </head>
-        <body>
+        <body>\n
         HTML;
         echo render_post($post, $slug);
-        echo "</body>$script</html>";
+        echo "</body>\n$script\n</html>";
         exit;
     } else {
         http_response_code(404);
@@ -192,20 +193,20 @@ echo <<<HTML
 <body>
   <h1>My Blog</h1>
   <div class='h-card'>
-    <img class="u-photo" src="$avatar_url&size=80" alt="Avatar"/>
+    <img class="u-photo" src="$avatar_url&size=80" alt="avatar"/>
     <div class="h-card-text">
-        <a class="u-url u-uid" href="$site_url/">$site_url/</a>
-        <p class="p-note">$bio</p>
+      <a class="u-url u-uid" href="$site_url/">$site_url/</a>
+      <p class="p-note">$bio</p>
     </div>
   </div>
   <p>Subscribe: 
     <a href="/feed.php">RSS</a>|
     <a href="/feed.php?format=json">JSON</a>
-  </p>
+  </p>\n
 HTML;
 foreach ($files as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
 }
-echo "</body>$script</html>";
+echo "</body>\n$script\n</html>";
