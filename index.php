@@ -135,8 +135,8 @@ if ($slug) {
           <title>Post</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <meta name="description" content="$site_desc">
-          $indieweb_html_header
-          $shared_html_header
+        $indieweb_html_header
+        $shared_html_header
         </head>
         <body>\n
         HTML;
@@ -168,8 +168,8 @@ echo <<<HTML
   <!-- Feed -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.php">
   <link rel="alternate" type="application/json" title="JSON Feed" href="/feed.php?format=json">
-  $indieweb_html_header
-  $shared_html_header
+$indieweb_html_header
+$shared_html_header
 </head>
 <body>
   <h1>My Blog</h1>
