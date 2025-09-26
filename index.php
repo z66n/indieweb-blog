@@ -35,25 +35,6 @@ $shared_html_header = <<<HTML
   <meta property="og:type" content="website">
 HTML;
 
-$script .= <<<HTML
-<script>
-    document.querySelectorAll('time.dt-published').forEach(el => {
-        const utcTime = el.getAttribute('datetime');
-        if (!utcTime) return;
-        
-        const dt = new Date(utcTime); // JS parses ISO 8601 UTC
-        const formatted = dt.toLocaleString([], {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        el.textContent = formatted;
-    });
-</script>
-HTML;
-
 function get_content_html($content) {
     if (is_array($content)) {
         if (!empty($content['html'])) return $content['html'];
@@ -160,7 +141,7 @@ if ($slug) {
         <body>\n
         HTML;
         echo render_post($post, $slug);
-        echo "</body>\n$script\n</html>";
+        echo "</body>\n<script src='script.js'></script>\n</html>";
         exit;
     } else {
         http_response_code(404);
@@ -192,7 +173,7 @@ echo <<<HTML
 </head>
 <body>
   <h1>My Blog</h1>
-  <div class='h-card'>
+  <div class="h-card">
     <img class="u-photo" src="$avatar_url&size=80" alt="avatar"/>
     <div class="h-card-text">
       <a class="u-url u-uid" href="$site_url/">$site_url/</a>
@@ -209,4 +190,4 @@ foreach ($files as $file) {
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
 }
-echo "</body>\n$script\n</html>";
+echo "</body>\n<script src='script.js'></script>\n</html>";
