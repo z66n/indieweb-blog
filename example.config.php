@@ -26,3 +26,6 @@ $syndication_targets = [
 $syndication_tokens = [
     'https://your-syndication-site.com/micropub' => '123456789' // Bearer token for syndication endpoint
 ];
+
+// API response caching
+define('CACHE_TTL', 3600); // seconds

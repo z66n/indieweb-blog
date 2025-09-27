@@ -122,15 +122,30 @@ function render_post($post, $slug) {
     return $html;
 }
 
+function getApiResponse($url, $cacheFile, $cacheTime = 3600) {
+    // If cache exists and is fresh, return it
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
+        return json_decode(file_get_contents($cacheFile), true);
+    }
+
+    // Fetch from API
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    // Save response to cache
+    file_put_contents($cacheFile, $response);
+
+    return json_decode($response, true);
+}
+
 function count_webmention($slug) {
     global $site_url;
     // Mention counter
-    $ch = curl_init("https://webmention.io/api/count?target=$site_url/?p=$slug");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $json = curl_exec($ch);
-    curl_close($ch);
-
-    $data = json_decode($json, true);
+    $url = "https://webmention.io/api/count?target=$site_url/?p=$slug";
+    $cacheFile = __DIR__ . "/cache/cache_cnt_$slug.json";
+    $data = getApiResponse($url, $cacheFile, CACHE_TTL);
     
     $html = "  <div class='wm-counter'>";
     $html .= "(<span>" . ($data['type']['like'] ?? 0) . "</span> likes, ";
@@ -144,12 +159,9 @@ function count_webmention($slug) {
 function render_webmention($slug) {
     global $site_url;
     // All mentions
-    $ch = curl_init("https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $json = curl_exec($ch);
-    curl_close($ch);
-
-    $data = json_decode($json, true);
+    $url = "https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug";
+    $cacheFile = __DIR__ . "/cache/cache_wm_$slug.json";
+    $data = getApiResponse($url, $cacheFile, CACHE_TTL);
 
     foreach ($data['children'] as $mention) {
         // Likes

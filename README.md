@@ -21,12 +21,7 @@ A minimal PHP-based IndieWeb blog supporting [Micropub](https://indieweb.org/Mic
    ```
    Edit `config.php` and update your site details.
 
-3. **Create the `posts/` directory if it doesn't exist:**
-   ```sh
-   mkdir posts
-   ```
-
-4. **Deploy to your PHP web server.**
+3. **Deploy to your PHP web server.**
 
 ## Endpoints
 
@@ -40,6 +35,7 @@ A minimal PHP-based IndieWeb blog supporting [Micropub](https://indieweb.org/Mic
 - IndieAuth: [https://indieauth.com/](https://indieauth.com/)
 - Microsub: [https://aperture.p3k.io/](https://aperture.p3k.io/)
 - Webmention: [https://webmention.io/](https://webmention.io/)
+- Micropub: [https://quill.p3k.io/](https://quill.p3k.io/)
 
 ## License
 
