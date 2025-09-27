@@ -108,16 +108,76 @@ function render_post($post, $slug) {
     // Syndicated copies (u-syndication)
     $syndicated_urls = $post['properties']['u-syndication'] ?? [];
     if (!empty($syndicated_urls)) {
-        $html .= "    <div class='u-syndication'>Syndicated copies: ";
+        $html .= "    <div class='posse-links'>Also on: ";
         $links = array_map(function($url) {
-            return "<a rel='syndication' class='u-syndication' href='$url'>$url</a>";
+            $host = parse_url($url, PHP_URL_HOST); // get the domain
+            return "<a rel='syndication' class='u-syndication' href='$url'>$host</a>";
         }, $syndicated_urls);
         $html .= implode(", ", $links);
         $html .= "</div>\n";
     }
 
     $html .= "  </article>\n";
+
+    return $html;
+}
+
+function count_webmention($slug) {
+    global $site_url;
+    // Mention counter
+    $ch = curl_init("https://webmention.io/api/count?target=$site_url/?p=$slug");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $json = curl_exec($ch);
+    curl_close($ch);
+
+    $data = json_decode($json, true);
     
+    $html = "  <div class='wm-counter'>";
+    $html .= "(<span>" . ($data['type']['like'] ?? 0) . "</span> likes, ";
+    $html .= "<span>" . ($data['type']['reply'] ?? 0) . "</span> replies, ";
+    $html .= "<span>" . ($data['type']['repost'] ?? 0) . "</span> reposts)";
+    $html .= "</div>\n";
+
+    return $html;
+}
+
+function render_webmention($slug) {
+    global $site_url;
+    // All mentions
+    $ch = curl_init("https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $json = curl_exec($ch);
+    curl_close($ch);
+
+    $data = json_decode($json, true);
+
+    foreach ($data['children'] as $mention) {
+        // Likes
+        if ($mention['wm-property'] === 'like-of') {
+            $html .= '  <div class="wm like">'
+                . '<a href="'.$mention['author']['url'].'">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '</a>liked this</div>'."\n";
+        }
+
+        // Replies
+        if ($mention['wm-property'] === 'in-reply-to') {
+            $html .= '  <div class="wm reply">'
+                . '<a href="'.$mention['author']['url'].'">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '</a>replied: '
+                . $mention['content']['html'].'</div>'."\n";
+        }
+
+        // Reposts
+        if ($mention['wm-property'] === 'repost-of') {
+            $html .= '  <div class="wm repost">'
+                . '<a href="'.$mention['author']['url'].'">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '</a>reposted this</div>'."\n";
+        }
+    }
+
     return $html;
 }
 
@@ -141,6 +201,8 @@ if ($slug) {
         <body>\n
         HTML;
         echo render_post($post, $slug);
+        echo count_webmention($slug);
+        echo render_webmention($slug);
         echo "</body>\n<script src='script.js'></script>\n</html>";
         exit;
     } else {
@@ -189,5 +251,6 @@ foreach ($files as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
+    echo count_webmention($slug);
 }
 echo "</body>\n<script src='script.js'></script>\n</html>";

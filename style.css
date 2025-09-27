@@ -106,3 +106,69 @@ p a {
 .h-entry .p-author img.u-photo {
     border-radius: 50%;
 }
+
+.posse-links {
+    padding: 0.3em 0.5em;
+    border-left: 2px solid #a0c4ff;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.wm-counter {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: right;
+}
+
+.wm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.wm img {
+  display: block;      /* prevents extra descender space below img */
+}
+
+/* dark theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1e1e1e;
+        color: #ddd;
+    }
+
+    a {
+        color: #4aa3df; /* link color for dark background */
+    }
+
+    .h-card {
+        border: 1px solid #ccc;
+        background: #222;
+    }
+    
+    .h-card .p-note {
+        color: #ccc;
+    }
+
+    .h-entry {
+        border-bottom: 1px solid #666;
+    }
+
+    .h-entry .tags {
+        color: #bbb;
+    }
+
+    .h-entry .tags .p-category {
+        background: #444;
+    }
+
+    .posse-links {
+        color: #aaa;
+    }
+
+    .wm-counter {
+        color: #aaa;
+    }
+}
