@@ -185,7 +185,7 @@ function render_webmention($slug) {
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
                 . '</a>replied: '
-                . $mention['content']['html'].'</div>'."\n";
+                . ($mention['content']['html'] ?? $mention['content']['text']).'</div>'."\n";
         }
 
         // Reposts
