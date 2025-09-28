@@ -3,18 +3,14 @@
 
 // Load configuration
 require_once __DIR__ . '/config.php';
-
-// --- CONFIG ---
-$BASE_URL = $site_url;
-$INDIEAUTH_TOKEN_URL = $token_endpoint; // IndieAuth token verification
 $POSTS_DIR = __DIR__ . '/posts'; // folder to store posts
 if (!is_dir($POSTS_DIR)) mkdir($POSTS_DIR, 0755, true);
 
 // --- FUNCTIONS ---
 function verify_token($access_token) {
-    global $INDIEAUTH_TOKEN_URL;
+    global $token_endpoint; // IndieAuth token verification
     $headers = ["Authorization: Bearer $access_token"];
-    $ch = curl_init($INDIEAUTH_TOKEN_URL);
+    $ch = curl_init($token_endpoint);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $res = curl_exec($ch);
@@ -61,6 +57,7 @@ if ($method === 'POST') {
             'bookmark-of'     => $_POST['bookmark-of'] ?? null,
             'like-of'         => $_POST['like-of'] ?? null,
             'in-reply-to'     => $_POST['in-reply-to'] ?? null,
+            'repost-of'       => $_POST['repost-of'] ?? null,
             'location'        => $_POST['location'] ?? null,
             'mp-syndicate-to' => (array)($_POST['mp-syndicate-to'] ?? []),
         ];
@@ -73,7 +70,7 @@ if ($method === 'POST') {
     $date         = date('Y-m-d-H-i-s');
     $slug         = preg_replace('/[^a-z0-9_-]/', '', strtolower($get('mp-slug') ?? $date));
     $filename     = "$POSTS_DIR/$slug.json";
-    $location_url = "$BASE_URL/?p=$slug";
+    $location_url = "$site_url/?p=$slug";
 
     // Build final post object (shared)
     $post = [
@@ -88,6 +85,7 @@ if ($method === 'POST') {
             'bookmark-of'     => (array)($props['bookmark-of'] ?? []),
             'like-of'         => (array)($props['like-of'] ?? []),
             'in-reply-to'     => (array)($props['in-reply-to'] ?? []),
+            'repost-of'       => (array)($props['repost-of'] ?? []),
             'location'        => (array)($props['location'] ?? []),
             'mp-syndicate-to' => (array)($props['mp-syndicate-to'] ?? []),
             'author'          => [$user],
@@ -99,13 +97,13 @@ if ($method === 'POST') {
         $targets = $post['properties']['mp-syndicate-to'];
         $syndicated_urls = []; // initialize array
         foreach ($targets as $endpoint) {
-            $known_token = $syndication_tokens[$endpoint] ?? "";
+            $token = $syndication_tokens[$endpoint] ?? "";
             $ch = curl_init($endpoint);
             curl_setopt($ch, CURLOPT_POST, true);
             // Form-encoded POST: Quill only supports syndication for note and bookmark
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $known_token, 
+                'Authorization: Bearer ' . $token, 
                 'Content-Type: application/x-www-form-urlencoded'
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -134,6 +132,18 @@ if ($method === 'POST') {
     // Save post
     file_put_contents($filename, json_encode($post, JSON_PRETTY_PRINT));
 
+    // Send webmentions
+    if (!empty($post['properties']['like-of']) ||
+        !empty($post['properties']['in-reply-to']) ||
+        !empty($post['properties']['repost-of']) ||
+        (!empty($post['properties']['content']) && 
+        is_array($post['properties']['content'][0]) && 
+        !empty($post['properties']['content'][0]['html']))
+    ) {
+        require __DIR__ . '/send-webmentions.php';
+    }
+
+    // Respond with 201 Created
     http_response_code(201);
     header('Content-Type: application/json');
     header('Location: ' . $location_url);

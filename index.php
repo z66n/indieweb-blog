@@ -3,6 +3,8 @@
 
 // Load configuration
 require_once __DIR__ . '/config.php';
+$CACHE_DIR = __DIR__ . '/cache'; // folder to store cache
+if (!is_dir($CACHE_DIR)) mkdir($CACHE_DIR, 0755, true);
 
 $indieweb_html_header = <<<HTML
   <!-- IndieAuth discovery -->
@@ -72,18 +74,23 @@ function render_post($post, $slug) {
         $html .= "    <time class='dt-published' datetime='{$published_raw}'>$published</time>\n";
     }
 
+    // Favorites (likes) 
+    if (!empty($get('like-of'))) {
+        $html .= "    <p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$get('like-of')}'>{$get('like-of')}</a></p>\n";
+    }
     // Replies
     if (!empty($get('in-reply-to'))) {
         $html .= "    <p>💬 <span class='p-name'>Reply to</span> <a class='u-in-reply-to' href='{$get('in-reply-to')}'>{$get('in-reply-to')}</a></p>\n";
+    }
+    // Reposts
+    if (!empty($get('repost-of'))) {
+        $html .= "    <p>🔃 <span class='p-name'>Reposted</span> <a class='u-repost-of' href='{$get('repost-of')}'>{$get('repost-of')}</a></p>\n";
     }
     // Bookmarks
     if (!empty($get('bookmark-of'))) {
         $html .= "    <p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$get('bookmark-of')}'>{$get('bookmark-of')}</a></p>\n";
     }
-    // Favorites
-    if (!empty($get('like-of'))) {
-        $html .= "    <p>⭐ <span class='p-name'>Favorited</span> <a class='u-like-of' href='{$get('like-of')}'>{$get('like-of')}</a></p>\n";
-    }
+
 
     // Content (always)
     if (!empty($get('content'))) {
@@ -102,7 +109,7 @@ function render_post($post, $slug) {
 
     // Author (h-card / u-author)
     if (!empty($get('author'))) {
-        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt='author avatar'/><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>\n";
+        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt=''/><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
@@ -144,7 +151,7 @@ function count_webmention($slug) {
     global $site_url;
     // Mention counter
     $url = "https://webmention.io/api/count?target=$site_url/?p=$slug";
-    $cacheFile = __DIR__ . "/cache/cache_cnt_$slug.json";
+    $cacheFile = "$CACHE_DIR/cache_cnt_$slug.json";
     $data = getApiResponse($url, $cacheFile, CACHE_TTL);
     
     $html = "  <div class='wm-counter'>";
@@ -160,7 +167,7 @@ function render_webmention($slug) {
     global $site_url;
     // All mentions
     $url = "https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug";
-    $cacheFile = __DIR__ . "/cache/cache_wm_$slug.json";
+    $cacheFile = "$CACHE_DIR/cache_wm_$slug.json";
     $data = getApiResponse($url, $cacheFile, CACHE_TTL);
 
     foreach ($data['children'] as $mention) {
@@ -168,7 +175,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'like-of') {
             $html .= '  <div class="wm like">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
                 . '</a>liked this</div>'."\n";
         }
 
@@ -176,7 +183,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'in-reply-to') {
             $html .= '  <div class="wm reply">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
                 . '</a>replied: '
                 . $mention['content']['html'].'</div>'."\n";
         }
@@ -185,7 +192,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'repost-of') {
             $html .= '  <div class="wm repost">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'nobody').'" width="32">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
                 . '</a>reposted this</div>'."\n";
         }
     }
@@ -248,7 +255,7 @@ $shared_html_header
 <body>
   <h1>My Blog</h1>
   <div class="h-card">
-    <img class="u-photo" src="$avatar_url&size=80" alt="avatar"/>
+    <img class="u-photo" src="$avatar_url&size=80" alt=""/>
     <div class="h-card-text">
       <a class="u-url u-uid" href="$site_url/">$site_url/</a>
       <p class="p-note">$bio</p>
