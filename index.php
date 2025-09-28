@@ -129,7 +129,7 @@ function render_post($post, $slug) {
     return $html;
 }
 
-function getApiResponse($url, $cacheFile, $cacheTime = 3600) {
+function getApiResponse($url, $cacheFile, $cacheTime) {
     // If cache exists and is fresh, return it
     if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
         return json_decode(file_get_contents($cacheFile), true);
@@ -147,12 +147,12 @@ function getApiResponse($url, $cacheFile, $cacheTime = 3600) {
     return json_decode($response, true);
 }
 
-function count_webmention($slug) {
-    global $site_url;
+function count_webmention($slug, $cacheTime) {
+    global $site_url, $CACHE_DIR;
     // Mention counter
     $url = "https://webmention.io/api/count?target=$site_url/?p=$slug";
     $cacheFile = "$CACHE_DIR/cache_cnt_$slug.json";
-    $data = getApiResponse($url, $cacheFile, CACHE_TTL);
+    $data = getApiResponse($url, $cacheFile, $cacheTime);
     
     $html = "  <div class='wm-counter'>";
     $html .= "(<span>" . ($data['type']['like'] ?? 0) . "</span> likes, ";
@@ -163,12 +163,12 @@ function count_webmention($slug) {
     return $html;
 }
 
-function render_webmention($slug) {
-    global $site_url;
+function render_webmention($slug, $cacheTime) {
+    global $site_url, $CACHE_DIR;
     // All mentions
     $url = "https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug";
     $cacheFile = "$CACHE_DIR/cache_wm_$slug.json";
-    $data = getApiResponse($url, $cacheFile, CACHE_TTL);
+    $data = getApiResponse($url, $cacheFile, $cacheTime);
 
     foreach ($data['children'] as $mention) {
         // Likes
@@ -176,7 +176,7 @@ function render_webmention($slug) {
             $html .= '  <div class="wm like">'
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
-                . '</a>liked this</div>'."\n";
+                . '</a><div class="wm-body">liked this</div></div>'."\n";
         }
 
         // Replies
@@ -184,8 +184,8 @@ function render_webmention($slug) {
             $html .= '  <div class="wm reply">'
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
-                . '</a>replied: '
-                . ($mention['content']['html'] ?? $mention['content']['text']).'</div>'."\n";
+                . '</a><div class="wm-body">replied: '
+                . ($mention['content']['html'] ?? $mention['content']['text']).'</div></div>'."\n";
         }
 
         // Reposts
@@ -193,7 +193,7 @@ function render_webmention($slug) {
             $html .= '  <div class="wm repost">'
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
-                . '</a>reposted this</div>'."\n";
+                . '</a><div class="wm-body">reposted this</div></div>'."\n";
         }
     }
 
@@ -206,12 +206,16 @@ if ($slug) {
     $path = __DIR__ . "/posts/$slug.json";
     if (file_exists($path)) {
         $post = json_decode(file_get_contents($path), true);
+        // Unwrap helper for single value arrays
+        $get = fn($k) => isset($post['properties'][$k]) ? $post['properties'][$k][0] ?? '' : '';
+        $name = $get('name');
+        $title = !empty($name) ? $name : $slug;
         echo <<<HTML
         <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <title>Post</title>
+          <title>$title</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <meta name="description" content="$site_desc">
         $indieweb_html_header
@@ -220,8 +224,8 @@ if ($slug) {
         <body>\n
         HTML;
         echo render_post($post, $slug);
-        echo count_webmention($slug);
-        echo render_webmention($slug);
+        echo count_webmention($slug, $cache_ttl);
+        echo render_webmention($slug, $cache_ttl);
         echo "</body>\n<script src='script.js'></script>\n</html>";
         exit;
     } else {
@@ -253,7 +257,7 @@ $indieweb_html_header
 $shared_html_header
 </head>
 <body>
-  <h1>My Blog</h1>
+  <h1>$site_name</h1>
   <div class="h-card">
     <img class="u-photo" src="$avatar_url&size=80" alt=""/>
     <div class="h-card-text">
@@ -270,6 +274,6 @@ foreach ($files as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
-    echo count_webmention($slug);
+    echo count_webmention($slug, $cache_ttl);
 }
 echo "</body>\n<script src='script.js'></script>\n</html>";

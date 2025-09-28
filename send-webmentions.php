@@ -67,7 +67,7 @@ function sendWebmention($token, $source, $target) {
 // Send mentions to all targets
 foreach ($targets as $target) {
     echo "Sending webmention: $source → $target\n";
-    $response = sendWebmention(TELEGRAPH_TOKEN, $source, $target);
+    $response = sendWebmention($telegraph_token, $source, $target);
     if ($response) {
         echo "Success: $response\n";
     } else {

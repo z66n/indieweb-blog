@@ -7,6 +7,7 @@ body {
     padding: 0 1rem;
     background: #fafafa;
     color: #222;
+    word-break: break-word;
 }
 
 a {
@@ -123,13 +124,22 @@ p a {
 .wm {
     display: flex;
     align-items: center;
+    flex-wrap: wrap; 
     gap: 0.5rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
 }
 
 .wm img {
-  display: block;      /* prevents extra descender space below img */
+    display: block;      /* prevents extra descender space below img */
+    border-radius: 50%;
+}
+
+.wm-body {
+    flex: 1;             /* take remaining width */
+    line-height: 1.4;    /* nicer multiline spacing */
 }
 
 /* dark theme */
@@ -144,7 +154,7 @@ p a {
     }
 
     .h-card {
-        border: 1px solid #ccc;
+        border: 1px solid #888;
         background: #222;
     }
     
@@ -161,7 +171,7 @@ p a {
     }
 
     .h-entry .tags .p-category {
-        background: #444;
+        background: #333;
     }
 
     .posse-links {
@@ -170,5 +180,9 @@ p a {
 
     .wm-counter {
         color: #aaa;
+    }
+
+    .wm {
+        border: 1px solid #888;
     }
 }
