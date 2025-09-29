@@ -1,16 +1,17 @@
-# IndieWeb Minimal Micropub Blog
+# IndieWeb Blog
 
-A minimal PHP-based IndieWeb blog supporting [Micropub](https://indieweb.org/Micropub), [IndieAuth](https://indieweb.org/IndieAuth), and JSON/RSS feeds. Posts are stored as JSON files.
+A minimal PHP-based IndieWeb blog supporting [IndieAuth](https://indieweb.org/IndieAuth), [Micropub](https://indieweb.org/Micropub), and [Webmention](https://indieweb.org/Webmention).
 
 ## Features
 
-- IndieAuth authentication
-- Micropub endpoint for publishing posts
+- IndieAuth authentication via [IndieAuth](https://indieauth.com/)
+- Microformats2 support
+- Micropub endpoint (`/micropub.php`) compatible with [Quill](https://quill.p3k.io/)
 - Syndication to other Micropub endpoints
-- JSON Feed and RSS Feed
-- Send and receive Webmentions
-- Webmention, Microsub, and IndieAuth endpoint discovery
-- Minimal, file-based storage (no database required)
+- Send and receive Webmentions via [Telegraph](https://telegraph.p3k.io/) and [Webmention.io](https://webmention.io/)
+- Microsub endpoint via [Aperture](https://aperture.p3k.io/)
+- Minimal, file-based storage
+- RSS Feed (`/feed.php`) and JSON Feed (`/feed.php?format=json`)
 
 ## Getting Started
 
@@ -20,24 +21,9 @@ A minimal PHP-based IndieWeb blog supporting [Micropub](https://indieweb.org/Mic
    ```sh
    cp example.config.php config.php
    ```
-   Edit `config.php` and update your site details.
+   Edit `config.php` to configure your settings.
 
 3. **Deploy to your PHP web server.**
-
-## Endpoints
-
-- **Home:** `/index.php`
-- **Micropub:** `/micropub.php`
-- **RSS Feed:** `/feed.php`
-- **JSON Feed:** `/feed.php?format=json`
-
-## IndieWeb Integration
-
-- IndieAuth: [https://indieauth.com/](https://indieauth.com/)
-- Microsub: [https://aperture.p3k.io/](https://aperture.p3k.io/)
-- Webmention: [https://webmention.io/](https://webmention.io/)
-- Micropub: [https://quill.p3k.io/](https://quill.p3k.io/)
-- Telegraph: [https://telegraph.p3k.io/](https://telegraph.p3k.io/)
 
 ## License
 
