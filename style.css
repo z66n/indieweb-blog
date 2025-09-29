@@ -142,6 +142,27 @@ p a {
     line-height: 1.4;    /* nicer multiline spacing */
 }
 
+.wm-meta {
+    display: none;
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 0.25rem;     /* slight spacing from body */
+    flex-basis: 100%;        /* push meta to next line */
+}
+
+.wm.show-meta .wm-meta {
+    display: block;
+}
+
+.wm-meta a {
+    color: inherit;          /* keep link muted */
+}
+
+.wm-meta a:hover {
+    text-decoration: underline; /* subtle hover cue */
+}
+
+
 /* dark theme */
 @media (prefers-color-scheme: dark) {
     body {

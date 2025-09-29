@@ -1,3 +1,4 @@
+// Convert UTC ISO 8601 to local time
 document.querySelectorAll('time.dt-published').forEach(el => {
     const utcTime = el.getAttribute('datetime');
     if (!utcTime) return;
@@ -11,4 +12,16 @@ document.querySelectorAll('time.dt-published').forEach(el => {
         minute: '2-digit'
     });
     el.textContent = formatted;
+});
+
+// Click or tap to toggle metadata visibility
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".wm").forEach(wm => {
+    wm.addEventListener("click", e => {
+      // If click was inside a link (<a> or its children), don’t toggle
+      if (e.target.closest("a")) return;
+
+      wm.classList.toggle("show-meta");
+    });
+  });
 });

@@ -91,7 +91,6 @@ function render_post($post, $slug) {
         $html .= "    <p>🔖 <span class='p-name'>Bookmarked</span> <a class='u-bookmark-of' href='{$get('bookmark-of')}'>{$get('bookmark-of')}</a></p>\n";
     }
 
-
     // Content (always)
     if (!empty($get('content'))) {
         $content = get_content_html($get('content'));
@@ -157,7 +156,8 @@ function count_webmention($slug, $cacheTime) {
     $html = "  <div class='wm-counter'>";
     $html .= "(<span>" . ($data['type']['like'] ?? 0) . "</span> likes, ";
     $html .= "<span>" . ($data['type']['reply'] ?? 0) . "</span> replies, ";
-    $html .= "<span>" . ($data['type']['repost'] ?? 0) . "</span> reposts)";
+    $html .= "<span>" . ($data['type']['repost'] ?? 0) . "</span> reposts, ";
+    $html .= "<span>" . ($data['type']['mention'] ?? 0) . "</span> mentions)";
     $html .= "</div>\n";
 
     return $html;
@@ -171,12 +171,15 @@ function render_webmention($slug, $cacheTime) {
     $data = getApiResponse($url, $cacheFile, $cacheTime);
 
     foreach ($data['children'] as $mention) {
+        $time = !empty($mention['published']) ? $mention['published'] : $mention['wm-received'];
         // Likes
         if ($mention['wm-property'] === 'like-of') {
             $html .= '  <div class="wm like">'
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
-                . '</a><div class="wm-body">liked this</div></div>'."\n";
+                . '</a><div class="wm-body">liked this</div>'
+                . '<div class="wm-meta"><a href="'.$mention['url'].'">'
+                . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
         }
 
         // Replies
@@ -185,7 +188,9 @@ function render_webmention($slug, $cacheTime) {
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
                 . '</a><div class="wm-body">replied: '
-                . ($mention['content']['html'] ?? $mention['content']['text']).'</div></div>'."\n";
+                . ($mention['content']['html'] ?? $mention['content']['text']).'</div>'
+                . '<div class="wm-meta"><a href="'.$mention['url'].'">'
+                . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
         }
 
         // Reposts
@@ -193,7 +198,20 @@ function render_webmention($slug, $cacheTime) {
             $html .= '  <div class="wm repost">'
                 . '<a href="'.$mention['author']['url'].'">'
                 . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
-                . '</a><div class="wm-body">reposted this</div></div>'."\n";
+                . '</a><div class="wm-body">reposted this</div>'
+                . '<div class="wm-meta"><a href="'.$mention['url'].'">'
+                . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
+        }
+
+        // Mentions
+        if ($mention['wm-property'] === 'mention-of') {
+            $html .= '  <div class="wm mention">'
+                . '<a href="'.$mention['author']['url'].'">'
+                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
+                . '</a><div class="wm-body">mentioned this in: '
+                . '<a href="'.$mention['url'].'">'.$mention['name'].'</a></div>'
+                . '<div class="wm-meta"><a href="'.$mention['url'].'">'
+                . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
         }
     }
 
