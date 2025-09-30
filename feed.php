@@ -4,6 +4,14 @@
 // Load configuration
 require_once __DIR__ . '/config.php';
 
+function get_content_html($content) {
+    if (is_array($content)) {
+        if (!empty($content['html'])) return $content['html'];
+        return '';
+    }
+    return nl2br(htmlspecialchars($content));
+}
+
 header('Content-Type: application/xml; charset=utf-8');
 
 $files = glob(__DIR__ . "/posts/*.json");
@@ -25,19 +33,22 @@ if (isset($_GET['format']) && $_GET['format'] === "json") {
     header('Content-Type: application/json; charset=utf-8');
     $items = [];
     foreach ($posts as [$slug, $post]) {
-        $url = "$site_url/index.php?p=$slug";
-        $content = is_array($post['content'] ?? null) ? $post['content']['text'] : ($post['content'] ?? "");
+        $url = "$site_url/?p=$slug";
+        // unwrap helper
+        $get = fn($k) => isset($post['properties'][$k]) ? $post['properties'][$k][0] ?? '' : '';
+        $content = get_content_html($get('content'));
+        $title = !empty($get('name')) ? $get('name') : $slug;
         $items[] = [
             "id" => $url,
             "url" => $url,
-            "title" => $post['name'] ?? $slug,
+            "title" => $title,
             "content_text" => $content,
-            "date_published" => $post['published'] ?? "",
+            "date_published" => $get('published'),
         ];
     }
     echo json_encode([
         "version" => "https://jsonfeed.org/version/1",
-        "title" => "My Blog",
+        "title" => $site_name,
         "home_page_url" => $site_url,
         "feed_url" => "$site_url/feed.php?format=json",
         "items" => $items
@@ -50,20 +61,23 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 ?>
 <rss version="2.0">
   <channel>
-    <title>My Blog</title>
+    <title><?= htmlspecialchars($site_name) ?></title>
     <link><?= htmlspecialchars($site_url) ?></link>
-    <description>Micropub-powered blog feed</description>
+    <description><?= htmlspecialchars($site_desc) ?></description>
     <language>en</language>
-    <?php foreach ($posts as [$slug, $post]): 
-        $url = "$site_url/index.php?p=$slug";
-        $content = is_array($post['content'] ?? null) ? $post['content']['text'] : ($post['content'] ?? "");
+    <?php foreach ($posts as [$slug, $post]):
+        $url = "$site_url/?p=$slug";
+        // unwrap helper
+        $get = fn($k) => isset($post['properties'][$k]) ? $post['properties'][$k][0] ?? '' : '';
+        $title = !empty($get('name')) ? $get('name') : $slug;
+        $content = get_content_html($get('content'));
     ?>
     <item>
-      <title><?= htmlspecialchars($post['name'] ?? $slug) ?></title>
+      <title><?= htmlspecialchars($title) ?></title>
       <link><?= htmlspecialchars($url) ?></link>
       <guid><?= htmlspecialchars($url) ?></guid>
-      <?php if (!empty($post['published'])): ?>
-      <pubDate><?= date(DATE_RSS, strtotime($post['published'])) ?></pubDate>
+      <?php if (!empty($get('published'))): ?>
+      <pubDate><?= date(DATE_RSS, strtotime($get('published'))) ?></pubDate>
       <?php endif; ?>
       <description><![CDATA[<?= $content ?>]]></description>
     </item>

@@ -267,10 +267,10 @@ echo <<<HTML
   <meta charset="UTF-8">
   <title>$site_name</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content=$site_desc>
+  <meta name="description" content="$site_desc">
   <!-- Feed -->
-  <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.php">
-  <link rel="alternate" type="application/json" title="JSON Feed" href="/feed.php?format=json">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="$site_url/feed.php">
+  <link rel="alternate" type="application/json" title="JSON Feed" href="$site_url/feed.php?format=json">
 $indieweb_html_header
 $shared_html_header
 </head>
@@ -284,8 +284,8 @@ $shared_html_header
     </div>
   </div>
   <p>Subscribe: 
-    <a href="/feed.php">RSS</a>|
-    <a href="/feed.php?format=json">JSON</a>
+    <a href="$site_url/feed.php">RSS</a>|
+    <a href="$site_url/feed.php?format=json">JSON</a>
   </p>\n
 HTML;
 foreach ($files as $file) {
