@@ -129,21 +129,53 @@ function render_post($post, $slug) {
 }
 
 function getApiResponse($url, $cacheFile, $cacheTime) {
-    // If cache exists and is fresh, return it
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
-        return json_decode(file_get_contents($cacheFile), true);
+
+    $cacheExists = file_exists($cacheFile);
+    $cacheExpired = !$cacheExists || (time() - filemtime($cacheFile) > $cacheTime);
+
+    // 1. Serve cache immediately (even if expired)
+    if ($cacheExists) {
+        $cached = json_decode(file_get_contents($cacheFile), true);
+    } else {
+        $cached = null;
     }
 
-    // Fetch from API
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $response = curl_exec($ch);
-    curl_close($ch);
+    // 2. If cache expired, schedule async refresh
+    if ($cacheExpired) {
+        register_shutdown_function(function() use ($url, $cacheFile) {
+            // After response sent
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request(); // non-blocking
+            }
+            // Now do the slow work
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($ch);
+            curl_close($ch);
 
-    // Save response to cache
-    file_put_contents($cacheFile, $response);
+            if ($response) {
+                file_put_contents($cacheFile, $response);
+            }
+        });
+    }
 
-    return json_decode($response, true);
+    // 3. If no cache exists at all, sync fetch ONCE
+    if (!$cacheExists) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if ($response) {
+            file_put_contents($cacheFile, $response);
+            return json_decode($response, true);
+        }
+
+        // fallback when API fails
+        return [];
+    }
+
+    return $cached;
 }
 
 function count_webmention($slug, $cacheTime) {
@@ -260,6 +292,22 @@ usort($files, function($a, $b) {
     return filemtime($b) - filemtime($a);
 });
 
+// Pagination settings
+$postsPerPage = 10;
+
+// Total pages
+$totalPosts = count($files);
+$totalPages = ceil($totalPosts / $postsPerPage);
+
+// Current page
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$page = min($page, $totalPages);
+
+// Slice files for this page
+$start = ($page - 1) * $postsPerPage;
+$filesOnPage = array_slice($files, $start, $postsPerPage);
+
+// Render HTML
 echo <<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -288,10 +336,19 @@ $shared_html_header
     <a href="$site_url/feed.php?format=json">JSON</a>
   </p>\n
 HTML;
-foreach ($files as $file) {
+foreach ($filesOnPage as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
     echo count_webmention($slug, $cache_ttl);
 }
+echo "  <div class='pagination' style='margin: 2em 0;'>";
+if ($page > 1) {
+    echo "<a href='?page=" . ($page - 1) . "' class='prev' rel='prev'>← Newer Posts</a> ";
+}
+echo " Page $page of $totalPages ";
+if ($page < $totalPages) {
+    echo "<a href='?page=" . ($page + 1) . "' class='next' rel='next'>Older Posts →</a>";
+}
+echo "</div>\n";
 echo "</body>\n<script src='script.js'></script>\n</html>";

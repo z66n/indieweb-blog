@@ -2,3 +2,11 @@
   Order allow,deny
   Deny from all
 </Files>
+
+<If "%{REQUEST_URI} =~ m#^/posts/#">
+    Require all denied
+</If>
+
+<If "%{REQUEST_URI} =~ m#^/cache/#">
+    Require all denied
+</If>
