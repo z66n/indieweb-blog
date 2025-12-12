@@ -10,6 +10,12 @@ $admin_email = "admin@$site_domain";
 $bio = "Welcome, traveller";
 $avatar_url = "https://api.dicebear.com/9.x/identicon/png?seed=Leo&scale=80";
 
+// Directories
+$POSTS_DIR = __DIR__ . '/posts'; // folder to store posts
+if (!is_dir($POSTS_DIR)) mkdir($POSTS_DIR, 0755, true);
+$DATA_DIR = __DIR__ . '/data'; // folder to store cached webmention data
+if (!is_dir($DATA_DIR)) mkdir($DATA_DIR, 0755, true);
+
 // IndieWeb endpoints
 $authorization_endpoint = "https://indieauth.com/auth";
 $token_endpoint = "https://tokens.indieauth.com/token";
@@ -27,8 +33,8 @@ $syndication_tokens = [
     'https://your-syndication-site.com/micropub' => 'a1b2c3d4e5f6g7h8i9j0' // token for Micropub endpoint
 ];
 
-// Webmention.io API response caching
-$cache_ttl = 3600; // seconds
+// Webmention.io webhook secret
+$webhook_secret = '1234abcd';
 
 // Telegraph API token for sending webmentions
 $telegraph_token = 'a1b2c3d4e5f6g7h8i9j0';

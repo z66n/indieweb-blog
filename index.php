@@ -3,8 +3,6 @@
 
 // Load configuration
 require_once __DIR__ . '/config.php';
-$CACHE_DIR = __DIR__ . '/cache'; // folder to store cache
-if (!is_dir($CACHE_DIR)) mkdir($CACHE_DIR, 0755, true);
 
 $indieweb_html_header = <<<HTML
   <!-- IndieAuth discovery -->
@@ -128,62 +126,18 @@ function render_post($post, $slug) {
     return $html;
 }
 
-function getApiResponse($url, $cacheFile, $cacheTime) {
-
-    $cacheExists = file_exists($cacheFile);
-    $cacheExpired = !$cacheExists || (time() - filemtime($cacheFile) > $cacheTime);
-
-    // 1. Serve cache immediately (even if expired)
-    if ($cacheExists) {
-        $cached = json_decode(file_get_contents($cacheFile), true);
-    } else {
-        $cached = null;
+function get_data($dataFile) {
+    // Serve cached data
+    if (file_exists($dataFile)) {
+        return json_decode(file_get_contents($dataFile), true);
     }
-
-    // 2. If cache expired, schedule async refresh
-    if ($cacheExpired) {
-        register_shutdown_function(function() use ($url, $cacheFile) {
-            // After response sent
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request(); // non-blocking
-            }
-            // Now do the slow work
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($ch);
-            curl_close($ch);
-
-            if ($response) {
-                file_put_contents($cacheFile, $response);
-            }
-        });
-    }
-
-    // 3. If no cache exists at all, sync fetch ONCE
-    if (!$cacheExists) {
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        if ($response) {
-            file_put_contents($cacheFile, $response);
-            return json_decode($response, true);
-        }
-
-        // fallback when API fails
-        return [];
-    }
-
-    return $cached;
 }
 
-function count_webmention($slug, $cacheTime) {
-    global $site_url, $CACHE_DIR;
+function render_count($slug) {
+    global $DATA_DIR;
     // Mention counter
-    $url = "https://webmention.io/api/count?target=$site_url/?p=$slug";
-    $cacheFile = "$CACHE_DIR/cache_cnt_$slug.json";
-    $data = getApiResponse($url, $cacheFile, $cacheTime);
+    $dataFile = "$DATA_DIR/{$slug}_cnt.json";
+    $data = get_data($dataFile);
     
     $html = "  <div class='wm-counter'>";
     $html .= "(<span>" . ($data['type']['like'] ?? 0) . "</span> likes, ";
@@ -195,12 +149,12 @@ function count_webmention($slug, $cacheTime) {
     return $html;
 }
 
-function render_webmention($slug, $cacheTime) {
-    global $site_url, $CACHE_DIR;
+function render_webmention($slug) {
+    global $site_url, $DATA_DIR;
     // All mentions
     $url = "https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug";
-    $cacheFile = "$CACHE_DIR/cache_wm_$slug.json";
-    $data = getApiResponse($url, $cacheFile, $cacheTime);
+    $dataFile = "$DATA_DIR/{$slug}_wm.json";
+    $data = get_data($dataFile);
 
     foreach ($data['children'] as $mention) {
         $time = !empty($mention['published']) ? $mention['published'] : $mention['wm-received'];
@@ -274,8 +228,8 @@ if ($slug) {
         <body>\n
         HTML;
         echo render_post($post, $slug);
-        echo count_webmention($slug, $cache_ttl);
-        echo render_webmention($slug, $cache_ttl);
+        echo render_count($slug);
+        echo render_webmention($slug);
         echo "</body>\n<script src='script.js'></script>\n</html>";
         exit;
     } else {
@@ -340,7 +294,7 @@ foreach ($filesOnPage as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
     echo render_post($post, $slug);
-    echo count_webmention($slug, $cache_ttl);
+    echo render_count($slug);
 }
 echo "  <div class='pagination' style='margin: 2em 0;'>";
 if ($page > 1) {

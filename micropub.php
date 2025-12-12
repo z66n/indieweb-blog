@@ -1,10 +1,10 @@
 <?php
 // micropub.php - minimal PHP Micropub endpoint
 
-// Load configuration
+// Load configuration and helpers
 require_once __DIR__ . '/config.php';
-$POSTS_DIR = __DIR__ . '/posts'; // folder to store posts
-if (!is_dir($POSTS_DIR)) mkdir($POSTS_DIR, 0755, true);
+require_once __DIR__ . '/includes/fetch_webmentions.php'; // for fetching webmentions
+require_once __DIR__ . '/includes/send_webmentions.php'; // for sending webmentions
 
 // --- FUNCTIONS ---
 function verify_token($access_token) {
@@ -132,7 +132,11 @@ if ($method === 'POST') {
     // Save post
     file_put_contents($filename, json_encode($post, JSON_PRETTY_PRINT));
 
-    // Send webmentions
+    // Fetch inbound webmentions
+    fetch_count($slug);
+    fetch_mentions($slug);
+
+    // Send outbound webmentions
     if (!empty($post['properties']['like-of']) ||
         !empty($post['properties']['in-reply-to']) ||
         !empty($post['properties']['repost-of']) ||
@@ -140,7 +144,7 @@ if ($method === 'POST') {
         is_array($post['properties']['content'][0]) && 
         !empty($post['properties']['content'][0]['html']))
     ) {
-        require __DIR__ . '/send-webmentions.php';
+        send_webmentions($post, $location_url, $telegraph_token);
     }
 
     // Respond with 201 Created
