@@ -1,5 +1,5 @@
 <?php
-// send_webmentions.php - send webmentions via Telegraph API
+// includes/send_webmentions.php - send outbound webmentions via Telegraph API
 
 // Get links inside e-content (both HTML and plain text)
 function get_content_html_links($content) {
@@ -29,7 +29,7 @@ function get_targets($post) {
     return array_unique($targets); // Deduplicate
 }
 
-// Function to send one webmention via Telegraph
+// Send one webmention via Telegraph API
 function send_webmention($token, $source, $target) {
     $url = "https://telegraph.p3k.io/webmention";
     $data = http_build_query([
@@ -59,7 +59,7 @@ function send_webmention($token, $source, $target) {
     return $result;
 }
 
-// Main function to send all webmentions for a post
+// Send all webmentions for a post
 function send_webmentions($post, $source, $telegraph_token) {
     $targets = get_targets($post);
 

@@ -1,5 +1,5 @@
 <?php
-// webhook.php - A simple webhook endpoint to trigger webmention.io API data fetch
+// webhook.php - A simple webhook endpoint to trigger Webmention.io API data fetch
 
 // Load configuration and helpers
 require_once __DIR__ . '/config.php';

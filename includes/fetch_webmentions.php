@@ -1,5 +1,5 @@
 <?php
-// includes/fetch_webmentions.php - fetch webmentions from webmention.io API
+// includes/fetch_webmentions.php - fetch inbound webmentions via Webmention.io API
 
 // Load configuration
 require_once __DIR__ . '/../config.php';
@@ -22,7 +22,7 @@ function fetch_mentions($slug) {
     fetch_api_response($url, $dataFile);
 }
 
-// Helper function to fetch webmention.io API response and save to file
+// Helper function to fetch Webmention.io API response and save to file
 function fetch_api_response($url, $dataFile) {
     // Fetch new data
     $ch = curl_init($url);
