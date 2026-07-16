@@ -47,6 +47,12 @@ h1 {
     gap: 0.25rem; /* spacing between URL and note */
 }
 
+.h-card .p-name {
+    margin: 0;
+    font-weight: bold;
+    color: #005cc5;
+}
+
 .h-card .p-note {
     margin: 0;
     font-style: italic;
@@ -177,6 +183,10 @@ p a {
     .h-card {
         border: 1px solid #888;
         background: #222;
+    }
+
+    .h-card .p-name {
+        color: #4aa3df;
     }
     
     .h-card .p-note {

@@ -44,7 +44,7 @@ function get_content_html($content) {
 }
 
 function render_post($post, $slug) {
-    global $avatar_url;
+    global $avatar_url, $author_name;
 
     $html = "  <article class='h-entry'>\n";
 
@@ -106,7 +106,7 @@ function render_post($post, $slug) {
 
     // Author (h-card / u-author)
     if (!empty($get('author'))) {
-        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt=''/><a class='u-url' href='{$get('author')}'>{$get('author')}</a></div>\n";
+        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt=''/><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
@@ -281,7 +281,7 @@ $shared_html_header
   <div class="h-card">
     <img class="u-photo" src="$avatar_url&size=80" alt=""/>
     <div class="h-card-text">
-      <a class="u-url u-uid" href="$site_url/">$site_url/</a>
+      <a class="p-name u-url u-uid" href="$site_url/">$author_name</a>
       <p class="p-note">$bio</p>
     </div>
   </div>
