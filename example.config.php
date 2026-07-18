@@ -2,12 +2,12 @@
 // example.config.php - rename to config.php and update values
 
 // Site info
-$site_name = "My Blog";
+$site_name = "My IndieWeb Blog";
 $site_desc = "A simple Micropub-powered blog";
 $site_domain = "example.com";
 $site_url = "https://$site_domain";
-$admin_email = "admin@$site_domain";
 $author_name = "John Pearseed";
+$admin_email = "admin@$site_domain";
 $bio = "Welcome, traveller";
 $avatar_url = "https://api.dicebear.com/9.x/identicon/png?seed=Leo&scale=80";
 
