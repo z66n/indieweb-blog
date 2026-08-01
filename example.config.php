@@ -9,7 +9,7 @@ $site_url = "https://$site_domain";
 $author_name = "John Pearseed";
 $admin_email = "admin@$site_domain";
 $bio = "Welcome, traveller";
-$avatar_url = "https://api.dicebear.com/9.x/identicon/png?seed=Leo&scale=80";
+$avatar_url = "https://www.gravatar.com/avatar/" . hash("sha256", strtolower(trim($admin_email))) . "?d=identicon";
 
 // Directories
 $POSTS_DIR = __DIR__ . '/posts'; // folder to store posts
