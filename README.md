@@ -1,5 +1,9 @@
 # IndieWeb Blog
 
+[![IndieWebCamp](https://indieweb.org/images/4/4a/indiewebcamp-button.png)](https://indieweb.org/)
+[![Webmention](https://indieweb.org/images/0/03/webmention-button.png)](https://indieweb.org/Webmention)
+[![Microformats](https://indieweb.org/images/7/72/microformats-button.png)](https://microformats.org/)
+
 A minimal PHP-based IndieWeb blog supporting [IndieAuth](https://indieweb.org/IndieAuth), [Micropub](https://indieweb.org/Micropub), and [Webmention](https://indieweb.org/Webmention).
 
 ## Features
