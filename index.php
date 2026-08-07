@@ -106,7 +106,7 @@ function render_post($post, $slug) {
 
     // Author (h-card / u-author)
     if (!empty($get('author'))) {
-        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=60' alt=''/><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
+        $html .= "    <div class='p-author h-card'><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
@@ -204,6 +204,16 @@ function render_webmention($slug) {
     return $html;
 }
 
+function render_footer() {
+    echo <<<HTML
+    <footer>
+      <a href="https://xn--sr8hvo.ws/previous">←</a>
+      An <a href="https://xn--sr8hvo.ws">IndieWeb Webring</a> 🕸💍
+      <a href="https://xn--sr8hvo.ws/next">→</a>
+    </footer>\n
+    HTML;
+}
+
 $slug = $_GET['p'] ?? null;
 
 if ($slug) {
@@ -225,11 +235,17 @@ if ($slug) {
         $indieweb_html_header
         $shared_html_header
         </head>
-        <body>\n
+        <body>
+        <header>
+          <a href="$site_url">$site_name</a>
+        </header>
+        <main>\n
         HTML;
         echo render_post($post, $slug);
         echo render_count($slug);
         echo render_webmention($slug);
+        echo "</main>\n";
+        echo render_footer();
         echo "</body>\n<script src='script.js'></script>\n</html>";
         exit;
     } else {
@@ -247,7 +263,7 @@ usort($files, function($a, $b) {
 });
 
 // Pagination settings
-$postsPerPage = 10;
+$postsPerPage = 5;
 
 // Total pages
 $totalPosts = count($files);
@@ -277,14 +293,17 @@ $indieweb_html_header
 $shared_html_header
 </head>
 <body>
+<header>
   <h1>$site_name</h1>
   <div class="h-card">
     <img class="u-photo" src="$avatar_url&size=80" alt=""/>
     <div class="h-card-text">
-      <a class="p-name u-url u-uid" href="$site_url/">$author_name</a>
+      <a rel="me" class="p-name u-url u-uid" href="$site_url/">$author_name</a>
       <p class="p-note">$bio</p>
     </div>
   </div>
+</header>
+<main>
   <p>Subscribe: 
     <a href="$site_url/feed.php">RSS</a>|
     <a href="$site_url/feed.php?format=json">JSON</a>
@@ -296,7 +315,7 @@ foreach ($filesOnPage as $file) {
     echo render_post($post, $slug);
     echo render_count($slug);
 }
-echo "  <div class='pagination' style='margin: 2em 0;'>";
+echo "  <nav class='pagination' aria-label='Pagination'>\n";
 if ($page > 1) {
     echo "<a href='?page=" . ($page - 1) . "' class='prev' rel='prev'>← Newer Posts</a> ";
 }
@@ -304,5 +323,6 @@ echo " Page $page of $totalPages ";
 if ($page < $totalPages) {
     echo "<a href='?page=" . ($page + 1) . "' class='next' rel='next'>Older Posts →</a>";
 }
-echo "</div>\n";
+echo "</nav>\n</main>\n";
+echo render_footer();
 echo "</body>\n<script src='script.js'></script>\n</html>";

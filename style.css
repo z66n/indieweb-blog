@@ -168,6 +168,10 @@ p a {
     text-decoration: underline; /* subtle hover cue */
 }
 
+.pagination {
+    margin: 2rem 0;
+}
+
 
 /* dark theme */
 @media (prefers-color-scheme: dark) {
