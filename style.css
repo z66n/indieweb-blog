@@ -30,7 +30,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin: .5rem 0 .5rem 0;
     padding: 1rem;
     border: 1px solid #ddd;
     border-radius: .5rem;
@@ -70,10 +70,6 @@ p a {
     padding: 1rem 0;
 }
 
-.h-entry:last-child {
-    border-bottom: none;
-}
-
 .h-entry h2 {
     margin: 0 0 .25rem 0;
     font-size: 1.3rem;
@@ -105,7 +101,6 @@ p a {
     display: flex;
     align-items: center;
     gap: .5rem;
-    margin-top: .5rem;
     font-size: .85rem;
     color: #555;
 }
@@ -172,6 +167,13 @@ p a {
     margin: 2rem 0;
 }
 
+header {
+    margin-bottom: 2rem;
+}
+
+footer {
+    margin-top: 2rem;
+}
 
 /* dark theme */
 @media (prefers-color-scheme: dark) {

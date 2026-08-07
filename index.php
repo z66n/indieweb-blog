@@ -315,13 +315,13 @@ foreach ($filesOnPage as $file) {
     echo render_post($post, $slug);
     echo render_count($slug);
 }
-echo "  <nav class='pagination' aria-label='Pagination'>\n";
+echo "  <nav class='pagination' aria-label='Pagination'>";
 if ($page > 1) {
-    echo "<a href='?page=" . ($page - 1) . "' class='prev' rel='prev'>← Newer Posts</a> ";
+    echo "<a href='?page=" . ($page - 1) . "' class='prev' rel='prev'>← Newer Posts</a> • ";
 }
-echo " Page $page of $totalPages ";
+echo "<span aria-current='page'>Page $page of $totalPages</span>";
 if ($page < $totalPages) {
-    echo "<a href='?page=" . ($page + 1) . "' class='next' rel='next'>Older Posts →</a>";
+    echo " • <a href='?page=" . ($page + 1) . "' class='next' rel='next'>Older Posts →</a>";
 }
 echo "</nav>\n</main>\n";
 echo render_footer();
