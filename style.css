@@ -37,10 +37,6 @@ h1 {
     background: #fff;
 }
 
-.h-card img.u-photo {
-    border-radius: 50%;
-}
-
 .h-card .profile-text {
     display: flex;
     flex-direction: column; /* stack URL and note vertically */
