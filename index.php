@@ -155,6 +155,7 @@ function render_webmention($slug) {
     $url = "https://webmention.io/api/mentions.jf2?target=$site_url/?p=$slug";
     $dataFile = "$DATA_DIR/{$slug}_wm.json";
     $data = get_data($dataFile);
+    $html = '';
 
     foreach ($data['children'] as $mention) {
         $time = !empty($mention['published']) ? $mention['published'] : $mention['wm-received'];
@@ -299,9 +300,9 @@ $shared_html_header
   <h1>$site_name</h1>
   <div class="h-card">
     <img class="u-photo" src="$avatar_url&size=80" alt=""/>
-    <div class="h-card-text">
+    <div class="profile">
       <a rel="me" class="p-name u-url u-uid" href="$site_url/">$author_name</a>
-      <p class="p-note">$bio</p>
+    <p class="p-note">$bio</p>
     </div>
   </div>
 </header>
