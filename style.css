@@ -81,7 +81,7 @@ p a {
 }
 
 .h-entry .tags {
-    margin-top: .5rem;
+    margin: .5rem 0 .5rem 0;
     font-size: .9rem;
     color: #444;
 }

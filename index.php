@@ -43,7 +43,7 @@ function get_content_html($content) {
     return nl2br(htmlspecialchars($content));
 }
 
-function render_post($post, $slug) {
+function render_post($post, $slug, $show_author = true) {
     global $avatar_url, $author_name;
 
     $html = "  <article class='h-entry'>\n";
@@ -105,8 +105,8 @@ function render_post($post, $slug) {
     }
 
     // Author (h-card / u-author)
-    if (!empty($get('author'))) {
-        $html .= "    <div class='p-author h-card'><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
+    if (!empty($get('author')) && $show_author) {
+        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=16' alt=''/><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
@@ -315,7 +315,7 @@ HTML;
 foreach ($filesOnPage as $file) {
     $slug = basename($file, ".json");
     $post = json_decode(file_get_contents($file), true);
-    echo render_post($post, $slug);
+    echo render_post($post, $slug, false);
     echo render_count($slug);
 }
 echo "  <nav class='pagination' aria-label='Pagination'>";
