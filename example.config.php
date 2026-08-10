@@ -10,6 +10,8 @@ $author_name = "John Pearseed";
 $admin_email = "admin@$site_domain";
 $bio = "Welcome, traveller";
 $avatar_url = "https://www.gravatar.com/avatar/" . hash("sha256", strtolower(trim($admin_email))) . "?d=identicon";
+$mastodon_profile_url = "https://mastodon.social/@username";
+$mastodon_handle = "@username@mastodon.social";
 
 // Directories
 $POSTS_DIR = __DIR__ . '/posts'; // folder to store posts

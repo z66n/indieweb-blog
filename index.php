@@ -33,6 +33,9 @@ $shared_html_header = <<<HTML
   <meta property="og:image" content="$avatar_url&size=216">
   <meta property="og:url" content="$site_url">
   <meta property="og:type" content="website">
+  <!-- Mastodon Verification -->
+  <link rel="me" href="$mastodon_profile_url">
+  <meta name="fediverse:creator" content="$mastodon_handle">
 HTML;
 
 function get_content_html($content) {
