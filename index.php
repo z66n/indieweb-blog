@@ -159,11 +159,15 @@ function render_webmention($slug) {
 
     foreach ($data['children'] as $mention) {
         $time = !empty($mention['published']) ? $mention['published'] : $mention['wm-received'];
+        $fallback_photo = 'https://fast-cdn.wasmer.app/avatar/bsky-pfp-explosion-blue.png';
+        $photo = $mention['author']['photo'] ?: $fallback_photo;
+        $name = $mention['author']['name'] ?: 'web user';
+
         // Likes
         if ($mention['wm-property'] === 'like-of') {
             $html .= '  <div class="wm like">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
+                . '<img src="'.$photo.'" alt="'.$name.'" width="32" onerror="this.onerror=null;this.src=\''.$fallback_photo.'\'">'
                 . '</a><div class="wm-body">liked this</div>'
                 . '<div class="wm-meta"><a href="'.$mention['url'].'">'
                 . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
@@ -173,7 +177,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'in-reply-to') {
             $html .= '  <div class="wm reply">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
+                . '<img src="'.$photo.'" alt="'.$name.'" width="32" onerror="this.onerror=null;this.src=\''.$fallback_photo.'\'">'
                 . '</a><div class="wm-body">replied: '
                 . ($mention['content']['html'] ?? $mention['content']['text']).'</div>'
                 . '<div class="wm-meta"><a href="'.$mention['url'].'">'
@@ -184,7 +188,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'repost-of') {
             $html .= '  <div class="wm repost">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
+                . '<img src="'.$photo.'" alt="'.$name.'" width="32" onerror="this.onerror=null;this.src=\''.$fallback_photo.'\'">'
                 . '</a><div class="wm-body">reposted this</div>'
                 . '<div class="wm-meta"><a href="'.$mention['url'].'">'
                 . '<time class="dt-published" datetime="'.$time.'">'.$time.'</time></a></div></div>'."\n";
@@ -194,7 +198,7 @@ function render_webmention($slug) {
         if ($mention['wm-property'] === 'mention-of') {
             $html .= '  <div class="wm mention">'
                 . '<a href="'.$mention['author']['url'].'">'
-                . '<img src="'.$mention['author']['photo'].'" alt="'.($mention['author']['name'] ?: 'web user').'" width="32">'
+                . '<img src="'.$photo.'" alt="'.$name.'" width="32" onerror="this.onerror=null;this.src=\''.$fallback_photo.'\'">'
                 . '</a><div class="wm-body">mentioned this in: '
                 . '<a href="'.$mention['url'].'">'.$mention['name'].'</a></div>'
                 . '<div class="wm-meta"><a href="'.$mention['url'].'">'
