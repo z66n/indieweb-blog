@@ -106,7 +106,7 @@ function render_post($post, $slug, $show_author = true) {
 
     // Author (h-card / u-author)
     if (!empty($get('author')) && $show_author) {
-        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url&size=16' alt=''/><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
+        $html .= "    <div class='p-author h-card'><img class='u-photo' src='$avatar_url' alt='' width='16'/><a class='p-name u-url' href='{$get('author')}'>$author_name</a></div>\n";
     }
 
     // Syndicated copies (u-syndication)
@@ -299,7 +299,7 @@ $shared_html_header
 <header>
   <h1>$site_name</h1>
   <div class="h-card">
-    <img class="u-photo" src="$avatar_url&size=80" alt=""/>
+    <img class="u-photo" src="$avatar_url" alt="" width="80"/>
     <div class="profile">
       <a rel="me" class="p-name u-url u-uid" href="$site_url/">$author_name</a>
     <p class="p-note">$bio</p>
