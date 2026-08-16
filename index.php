@@ -27,6 +27,9 @@ $shared_html_header = <<<HTML
   <link rel="apple-touch-icon" sizes="180x180" href="$avatar_url&size=180">
   <link rel="icon" type="image/png" sizes="192x192" href="$avatar_url&size=192">
   <link rel="icon" type="image/png" sizes="512x512" href="$avatar_url&size=512">
+  <!-- Fediverse -->
+  <link rel="me" href="$mastodon_profile_url">
+  <meta name="fediverse:creator" content="$mastodon_handle">
 HTML;
 
 function get_content_html($content) {
@@ -228,16 +231,14 @@ if ($slug) {
         <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <title>$title</title>
+          <title>$title - $site_name</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <meta name="description" content="$site_desc">
           <link rel="canonical" href="$site_url/?p=$slug">
         $indieweb_html_header
         $shared_html_header
-          <!-- Fediverse -->
-          <meta name="fediverse:creator" content="$mastodon_handle">
           <!-- Open Graph -->
-          <meta property="og:title" content="$site_name">
+          <meta property="og:title" content="$title">
           <meta property="og:description" content="$site_desc">
           <meta property="og:image" content="$avatar_url&size=216">
           <meta property="og:url" content="$site_url/?p=$slug">
@@ -300,8 +301,6 @@ echo <<<HTML
   <link rel="alternate" type="application/json" title="JSON Feed" href="$site_url/feed.php?format=json">
 $indieweb_html_header
 $shared_html_header
-  <!-- Fediverse -->
-  <link rel="me" href="$mastodon_profile_url">
   <!-- Open Graph -->
   <meta property="og:title" content="$site_name">
   <meta property="og:description" content="$site_desc">
